@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="nl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pokémon Filters</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            margin: 20px;
+
+        }
+
+        .pokemon-card img {
+
+            max-height: 150px;
+
+            object-fit: contain;
+
+        }
+
+        .filter-container {
+
+            margin-bottom: 20px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 class="text-center mb-4">Pokémon Filters</h1>
+
+
+    <!-- Filteropties -->
+
+    <div class="filter-container">
+
+        <label for="type-filter" class="form-label"><strong>Filter op type:</strong></label>
+
+        <select id="type-filter" class="form-select">
+
+            <option value="">Alle types</option>
+
+            <!-- Dynamische opties komen hier -->
+
+        </select>
+
+    </div>
+
+
+
+    <!-- Pokémon Cards -->
+
+    <div id="pokemon-list" class="row g-3">
+
+        <!-- Dynamische inhoud hier -->
+
+    </div>
+
+</div>
+
+
+
+<!-- Modal voor details -->
+
+<div class="modal fade" id="pokemonModal" tabindex="-1" aria-labelledby="pokemonModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="pokemonModalLabel">Pokémon Details</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="text-center">
+
+                    <img id="modal-pokemon-img" src="" class="img-fluid mb-3" alt="Pokémon afbeelding" style="max-height: 200px;">
+
+                </div>
+
+                <h4 id="modal-pokemon-name" class="text-center"></h4>
+
+                <ul class="list-group">
+
+                    <li class="list-group-item"><strong>Type(s):</strong> <span id="modal-pokemon-types"></span></li>
+
+                    <li class="list-group-item"><strong>Hoogte:</strong> <span id="modal-pokemon-height"></span> m</li>
+
+                    <li class="list-group-item"><strong>Gewicht:</strong> <span id="modal-pokemon-weight"></span> kg</li>
+
+                    <li class="list-group-item"><strong>Statistieken:</strong>
+
+                        <ul id="modal-pokemon-stats" class="mt-2"></ul>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const baseUrl = "https://pokeapi.co/api/v2";
+    let allPokemons = [];  // Array om alle pokemons op te slaan
+
+    function haalAllePokemonsOp() {
+        axios.get(`https://pokeapi.co/api/v2/pokemon?limit=50`)
+            .then(response => {
+                allPokemons = response.data.results;
+                toonPokemons(allPokemons);
+            })
+            .catch(error => {
+                console.error("Fout bij het ophalen van gegevens:", error);
+                document.getElementById("pokemon-list").innerHTML =
+                    `<p class="text-danger">Er is een fout opgetreden bij het ophalen van de gegevens.</p>`;
+            });
+    }
+
+    function toonPokemons(pokemons) {
+        let outputHTML = '';
+        pokemons.forEach(pokemon => {
+            outputHTML += `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4 text-center">
+                    <div class="card" onclick="haalPokemonDetails('${pokemon.url}')">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokemonId(pokemon.url)}.png"
+                             class="card-img-top img-fluid" alt="${pokemon.name}" style="height: 200px; object-fit: cover;" >
+                        <div class="card-body">
+                            <h5 class="card-title">${pokemon.name}</h5>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById("pokemon-list").innerHTML = outputHTML;
+    }
+
+    function getPokemonId(url) {
+        const urlParts = url.split('/');
+        return urlParts[urlParts.length - 2];
+    }
+
+    function haalPokemonDetails(url) {
+        axios.get(url)
+            .then(response => {
+                const pokemon = response.data;
+                const modalContent = `
+   <div class="modal-body">
+
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokemonId(pokemon.url)}.png" class="card-img-top img-fluid" alt="${pokemon.name}" style="height: 200px; object-fit: cover;">
+
+                    <li class="list-group-item"><strong>Naam:</strong> ${pokemon.name}</li>
+
+                    <li class="list-group-item"><strong>Type(s):</strong> <span id="modal-pokemon-types"></span>${getPokemonId(pokemon.types)}</li>
+
+                    <li class="list-group-item"><strong>Hoogte:</strong> <span id="modal-pokemon-height"></span> ${pokemon.height}m</li>
+
+                    <li class="list-group-item"><strong>Gewicht:</strong> <span id="modal-pokemon-weight"></span> ${pokemon.weight}kg</li>
+
+                    <li class="list-group-item"><strong>Statistieken:</strong>
+                        <ul id="modal-pokemon-stats" class="mt-2">
+                            ${getPokemonId(pokemon.stats)}
+                        </ul>
+                    </li>
+</div>
+                `;
+
+                document.getElementById("modal-content").innerHTML = modalContent;
+            })
+            .catch(error => {
+                console.error("Fout bij het ophalen van details:", error);
+                document.getElementById("modal-content").innerHTML =
+                    `<p class="text-danger">Er is een fout opgetreden bij het ophalen van de details.</p>`;
+            });
+    }
+
+    haalAllePokemonsOp();
+</script>
+
+</body>
+</html>

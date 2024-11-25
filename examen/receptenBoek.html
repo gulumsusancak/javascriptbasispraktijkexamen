@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Recepten Boek</title>
+</head>
+<body>
+
+<script>
+
+    class Recept{
+        constructor(naam,ingredienten,bereidingstijd) {
+            this.naam=naam;
+            this.ingredienten=ingredienten;
+            this.bereidingstijd=bereidingstijd;
+        }
+        getDetails(){
+            return `Naam van de gerecht: ${this.naam}, Ingrediënten: ${this.ingredienten}, Tijd: ${this.bereidingstijd}min`;
+        }
+        voegIngrediëntToe(ingrediënt){
+            this.ingredienten.push(ingrediënt);
+        }
+        verwijderIngrediënt(ingrediënt){
+           this.ingredienten=this.ingredienten.filter((ingrediënt)=>this.ingredienten!==ingrediënt);
+        }
+    }
+
+    class Nagerecht extends Recept{
+        constructor(naam,ingredienten,bereidstijd,zoetheidsniveau) {
+            super(naam,ingredienten,bereidstijd);
+            this.zoetheidsniveau=zoetheidsniveau;
+        }
+        getDetails(){
+            return `Naam van de nagerecht: ${this.naam}, Ingrediënten: ${this.ingredienten}, Tijd: ${this.bereidingstijd}min, Zoetheidsniveau: ${this.zoetheidsniveau}`;
+        }
+    }
+    class Hoofdgerecht extends Recept{
+        constructor(naam,ingredienten,bereidstijd,porties) {
+            super(naam,ingredienten,bereidstijd);
+            this.porties=porties;
+        }
+        getDetails(){
+            return `Naam van de hoofdgerecht: ${this.naam}, Ingrediënten: ${this.ingredienten}, Tijd: ${this.bereidingstijd}min, Porties: ${this.porties}`;
+        }
+    }
+
+    class Receptenboek{
+        constructor() {
+            this.recepten=[];
+        }
+        voegReceptToe(recept){
+            this.recepten.push(recept);
+        }
+        toonRecepten(){
+            this.recepten.forEach(recept=>{
+                console.log(recept.getDetails());
+            });
+        }
+        zoekReceptOpNaam(naam){
+            return this.recepten.find(recept=>recept.naam===naam);
+        }
+        verwijderRecept(naam){
+            this.recepten=this.recepten.filter(recept=>recept.naam!==naam);
+        }
+        sorteerReceptenOpTijd(){
+            this.recepten.sort((a,b)=>a.bereidingstijd-b.bereidingstijd);
+        }
+
+    }
+
+    // Test de basisclass
+    const spaghetti = new Recept('Spaghetti Bolognese', ['Spaghetti', 'Tomatensaus', 'Gehakt'], 30);
+    console.log(spaghetti.getDetails()); // Details over het recept
+    spaghetti.voegIngrediëntToe('Parmezaanse kaas');
+    console.log(spaghetti.getDetails()); // Parmezaanse kaas toegevoegd
+    spaghetti.verwijderIngrediënt('Gehakt');
+    console.log(spaghetti.getDetails()); // Gehakt verwijderd
+
+    const taart = new Nagerecht('Chocoladetaart', ['Bloem', 'Suiker', 'Chocolade', 'Eieren'], 60, 8);
+    console.log(taart.getDetails()); // Details van de taart
+
+    const curry = new Hoofdgerecht('Thaise Curry', ['Rijst', 'Kokosmelk', 'Groenten'], 40, 4);
+    console.log(curry.getDetails()); // Details van de curry
+
+    // Test het receptenboek
+    const receptenboek = new Receptenboek();
+    receptenboek.voegReceptToe(spaghetti);
+    receptenboek.voegReceptToe(taart);
+    receptenboek.voegReceptToe(curry);
+
+    console.log('--- Alle recepten ---');
+    receptenboek.toonRecepten();
+
+    console.log('--- Zoek "Thaise Curry" ---');
+    const gevondenRecept = receptenboek.zoekReceptOpNaam('Thaise Curry');
+    console.log(gevondenRecept ? gevondenRecept.getDetails() : 'Recept niet gevonden.');
+
+    console.log('--- Sorteer op bereidingstijd ---');
+    receptenboek.sorteerReceptenOpTijd();
+    receptenboek.toonRecepten();
+
+    console.log('--- Verwijder "Spaghetti Bolognese" ---');
+    receptenboek.verwijderRecept('Spaghetti Bolognese');
+    receptenboek.toonRecepten();
+
+
+</script>
+</body>
+</html>
